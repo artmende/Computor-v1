@@ -42,30 +42,12 @@ def	check_for_common_errors(equation_string):
 		print("Problem with equation : 2 or more of those signs are next to each other : [+-.^]")
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
 		print("Problem with equation : Each exponent sign --> ^ must be followed by one of those numbers [012]")
-	if re.search("[+-](?![0-9])", equation_string) != None: # + - ^ with no digit after it
+	if re.search("[+-](?![0-9])", equation_string) != None: # + - with no digit after it
 		print("Problem with equation : Each + or - need to be followed by a number.")
 	search_result = re.search("[^xX+\-.^=0-9]", equation_string)
 	if search_result != None: #any other sign than {xX+-.^=[0-9]}
 		print("Problem with equation : Wrong character --> ", search_result[0])
 
-def	check_input_is_correct(argv_array):
-
-	# possible errors (after spaces and asterisks are removed and separated by equal) :
-	# any 2 of those signs next to each other : [+-.^]
-	# + - ^ with no digit after it
-	# no equal sign, or more than one -- taken care of
-	# exponent more than 2
-	# any other sign than {xX+-.^=[0-9]}
-
-	if len(argv_array) != 2:
-		print("We allow strictly 1 argument. It has to be the equation in a single string (Between quotes).")
-		print('Usage : ./computor "YOUR QUADRATIC EQUATION"')
-		return False
-	if argv_array[1].__contains__("=") == False:
-		print("Your equation must have an equal sign --> =")
-		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
-		return False
-	return True
 
 def	fix_input(raw_input):
 	# remove space
