@@ -18,10 +18,33 @@ def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	print('end of main')
 	print(clean_input_array)
+	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
+
+	print("Reduced equation is : " + str(reduced_coeff_array[2]) + "x^2 ", end="")
+	if (reduced_coeff_array[1] >= 0):
+		print("+", end="")
+	print(str(reduced_coeff_array[1]) + "x^1 ", end="")
+	if (reduced_coeff_array[0] >= 0):
+		print("+", end="")
+	print(str(reduced_coeff_array[0]) + " = 0")
+
+
+
+def	calculate_coefficients_of_reduced_equation(input_array):
+	coeff_x_0_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[0])))
+	coeff_x_0_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[1])))
+	coeff_x_1_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^1)", input_array[0])))
+	coeff_x_1_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^1)", input_array[1])))
+	coeff_x_2_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^2)", input_array[0])))
+	coeff_x_2_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^2)", input_array[1])))
+	reduced_coeff_array = [coeff_x_0_left_side - coeff_x_0_right_side, coeff_x_1_left_side - coeff_x_1_right_side, coeff_x_2_left_side - coeff_x_2_right_side]
+	return reduced_coeff_array
+
 
 
 
 def	args_check_and_treatment(argv):
+	# look for errors in equation, remove unneeded chars, normalize coefficients and exponents and split both side of the equal sign
 	if len(argv) != 2:
 		print("We allow strictly 1 argument. It has to be the equation in a single string (Between quotes).")
 		print('Usage : ./computor "YOUR QUADRATIC EQUATION"')
@@ -36,6 +59,8 @@ def	args_check_and_treatment(argv):
 	if check_for_common_errors(treated_equation) == False:
 		exit()
 	treated_equation = normalize_coeff_and_exponents(treated_equation)
+
+	treated_equation = treated_equation.split("=")
 
 	return treated_equation
 
@@ -65,24 +90,13 @@ def	normalize_coeff_and_exponents(equation):
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
 	search_result = re.search("(?<!\^)[0-9](?!x)", result)
 	while (search_result != None):
-		print("in the loop")
-		print("search_result[0] is ", search_result[0])
-		print("result is ", result)
+		print("string : ", result)
+		print("search result : ", search_result) ##################################################### NEED TO FIX THIS !!
 		result = re.sub("(?<!\^)[0-9](?!x)", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x
 		search_result = re.search("(?<!\^)[0-9](?!x)", result)
-		
 	return result
 
 
-def	fix_input(raw_input):
-	# remove space
-	# add 1 when there is no coefficient
-	# make sure all coefficients have x^y
-
-	input_no_space_no_star = raw_input.replace(' ', '').replace('*', '')
-	input_array = input_no_space_no_star.split('=')
-
-	return input_array
 
 
 
