@@ -17,6 +17,7 @@ import re
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	print('end of main')
+	print(clean_input_array)
 
 
 
@@ -29,24 +30,48 @@ def	args_check_and_treatment(argv):
 		print("Your equation must have one and only one equal sign --> =")
 		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
 		exit()
-	input_no_space_no_star = argv[1].replace(' ', '').replace('*', '')
-	# at this point there are no spaces and stars, and we know there is 1 and only 1 equal
-	print("yop")
-	check_for_common_errors(input_no_space_no_star)
-	
-	return True
+	treated_equation = argv[1].replace(' ', '').replace('*', '').lower()
+	# at this point there are no spaces and stars, x is only lowercase, and we know there is 1 and only 1 equal
+
+	if check_for_common_errors(treated_equation) == False:
+		exit()
+	treated_equation = normalize_coeff_and_exponents(treated_equation)
+
+	return treated_equation
 
 
 def	check_for_common_errors(equation_string):
+	result = True
 	if re.search("[+\-.^][+\-.^]", equation_string) != None: # any 2 of those signs next to each other : [+-.^]
 		print("Problem with equation : 2 or more of those signs are next to each other : [+-.^]")
+		result = False
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
 		print("Problem with equation : Each exponent sign --> ^ must be followed by one of those numbers [012]")
-	if re.search("[+-](?![0-9])", equation_string) != None: # + - with no digit after it
+		result = False
+	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("Problem with equation : Each + or - need to be followed by a number.")
-	search_result = re.search("[^xX+\-.^=0-9]", equation_string)
-	if search_result != None: #any other sign than {xX+-.^=[0-9]}
+		print(equation_string)
+		result = False
+	search_result = re.search("[^x+\-.^=0-9]", equation_string)
+	if search_result != None: #any other sign than {x+-.^=[0-9]}
 		print("Problem with equation : Wrong character --> ", search_result[0])
+		result = False
+	return result
+
+
+
+def	normalize_coeff_and_exponents(equation):
+	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
+	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
+	search_result = re.search("(?<!\^)[0-9](?!x)", result)
+	while (search_result != None):
+		print("in the loop")
+		print("search_result[0] is ", search_result[0])
+		print("result is ", result)
+		result = re.sub("(?<!\^)[0-9](?!x)", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x
+		search_result = re.search("(?<!\^)[0-9](?!x)", result)
+		
+	return result
 
 
 def	fix_input(raw_input):
