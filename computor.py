@@ -20,10 +20,11 @@ def	main():
 	print(clean_input_array)
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 
-	print("Reduced equation is : " + str(reduced_coeff_array[2]) + "x^2 ", end="")
-	if (reduced_coeff_array[1] >= 0):
-		print("+", end="")
-	print(str(reduced_coeff_array[1]) + "x^1 ", end="")
+	if reduced_coeff_array[2] != 0:
+		print("Reduced equation is : " + str(reduced_coeff_array[2]) + "x^2 ", end="")
+		if (reduced_coeff_array[1] > 0):
+			print("+", end="")
+	print(str(reduced_coeff_array[1]) + "x ", end="")
 	if (reduced_coeff_array[0] >= 0):
 		print("+", end="")
 	print(str(reduced_coeff_array[0]) + " = 0")
@@ -88,12 +89,12 @@ def	check_for_common_errors(equation_string):
 def	normalize_coeff_and_exponents(equation):
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-	search_result = re.search("(?<!\^)[0-9](?!x)", result)
+	search_result = re.search("(?<!\^)[0-9](?![x.])", result)
 	while (search_result != None):
 		print("string : ", result)
-		print("search result : ", search_result) ##################################################### NEED TO FIX THIS !!
-		result = re.sub("(?<!\^)[0-9](?!x)", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x
-		search_result = re.search("(?<!\^)[0-9](?!x)", result)
+		print("search result : ", search_result)
+		result = re.sub("(?<!\^)[0-9](?![x.])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or .)
+		search_result = re.search("(?<!\^)[0-9](?![x.])", result)
 	return result
 
 
