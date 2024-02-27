@@ -16,20 +16,39 @@ import re
 
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
-	print('end of main')
 	print(clean_input_array)
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
+	display_reduced_equation(reduced_coeff_array)
 
+
+def	display_reduced_equation(reduced_coeff_array):
+	# Negative coefficient will be automatically displayed with the minus sign but not positive ones
+	# We add a plus sign before positive coefficient only if they are not at the beginning of the string
+	str_to_display = ""
+	str_to_display += "Reduced equation is : "
 	if reduced_coeff_array[2] != 0:
-		print("Reduced equation is : " + str(reduced_coeff_array[2]) + "x^2 ", end="")
-		if (reduced_coeff_array[1] > 0):
-			print("+", end="")
-	print(str(reduced_coeff_array[1]) + "x ", end="")
-	if (reduced_coeff_array[0] >= 0):
-		print("+", end="")
-	print(str(reduced_coeff_array[0]) + " = 0")
+		str_to_display += floatToString(reduced_coeff_array[2])
+		str_to_display += "x^2"
+	if reduced_coeff_array[1] != 0:
+		if reduced_coeff_array[1] > 0 and reduced_coeff_array[2] != 0:
+			str_to_display += "+"
+		str_to_display += floatToString(reduced_coeff_array[1])
+		str_to_display += "x"
+	if reduced_coeff_array[0] != 0:
+		if reduced_coeff_array[0] > 0 and (reduced_coeff_array[2] != 0 or reduced_coeff_array[1] != 0):
+			str_to_display += "+"
+		str_to_display += floatToString(reduced_coeff_array[0])
+	str_to_display += " = 0"
+	for x in range(2): # We add a space before and after plus and minus signs that are not at the beginning of the string (They can be maximum 2)
+		search_result = re.search("(?<=[^ ])[+-](?=[^ ])", str_to_display)
+		if search_result != None:
+			str_to_display = re.sub("(?<=[^ ])[+-](?=[^ ])", " "  + search_result[0] + " ", str_to_display, count=1)
+	str_to_display = re.sub("\.0(?![0-9])", "", str_to_display) # getting rid of .0 when the coefficient is an integer
+	print(str_to_display)
 
 
+def	floatToString(inputValue):
+	return(str(inputValue))
 
 def	calculate_coefficients_of_reduced_equation(input_array):
 	coeff_x_0_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[0])))
@@ -54,8 +73,8 @@ def	args_check_and_treatment(argv):
 		print("Your equation must have one and only one equal sign --> =")
 		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
 		exit()
-	treated_equation = argv[1].replace(' ', '').replace('*', '').lower()
-	# at this point there are no spaces and stars, x is only lowercase, and we know there is 1 and only 1 equal
+	#treated_equation = argv[1].replace(' ', '').replace('*', '').lower()
+	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
 
 	if check_for_common_errors(treated_equation) == False:
 		exit()
@@ -87,14 +106,17 @@ def	check_for_common_errors(equation_string):
 
 
 def	normalize_coeff_and_exponents(equation):
+	
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
+	
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-	search_result = re.search("(?<!\^)[0-9](?![x.])", result)
+
+	#print("Equation before normalization : ", result)
+	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	while (search_result != None):
-		print("string : ", result)
-		print("search result : ", search_result)
-		result = re.sub("(?<!\^)[0-9](?![x.])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or .)
-		search_result = re.search("(?<!\^)[0-9](?![x.])", result)
+		result = re.sub("(?<!\^)[0-9](?![x.0-9])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or . or another number)
+		search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
+	#print("Equation after : ", result)
 	return result
 
 
