@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# All regex formulas here were crafted with the help of https://regexr.com/.
+# Please visit the website for formulas explanation
+
 import sys
 import re
 
@@ -19,6 +22,8 @@ def	main():
 	print(clean_input_array)
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
+	# TO DO : Calculate Delta
+	# Depending of the value of Delta, solutions can be real or complex
 
 
 def	display_reduced_equation(reduced_coeff_array):
@@ -51,6 +56,7 @@ def	floatToString(inputValue):
 	return(str(inputValue))
 
 def	calculate_coefficients_of_reduced_equation(input_array):
+	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
 	coeff_x_0_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[0])))
 	coeff_x_0_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[1])))
 	coeff_x_1_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^1)", input_array[0])))
