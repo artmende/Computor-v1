@@ -19,47 +19,64 @@ import re
 
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
-	print(clean_input_array)
+	print("")
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
-	delta = calculate_delta(reduced_coeff_array)
-	solutions = calculate_solutions(reduced_coeff_array, delta)
-	if solutions == None:
-		print("Any number is a solution.")
-		return
+
+	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 :# There is no x in the reduced equation.
+		print("There is no x in the reduced equation. Any number is a solution.")
 	elif reduced_coeff_array[2] == 0:
-		print("That is a linear equation. There is only one solution.")
-		print("x = ", solutions[0])
-	elif solutions[0] == solutions[1]:
-		print("For this equation, Delta is zero. We have a double root.")
-		print("x_1 = x_2 = ", solutions[0])
+		display_solution_linear(reduced_coeff_array)
 	else:
-		print("Delta = ", delta)
-		print("x_1 = ", solutions[0])
-		print("x_2 = ", solutions[1])
-	# TO DO : Calculate Delta
-	# Depending of the value of Delta, solutions can be real or complex
+		display_solutions_quadratic(reduced_coeff_array)
 
-def	calculate_solutions(coeff_array, delta):
+
+
+
+
+def	display_solution_linear(coeff_array):
+	# There is a single solution. x = -c/b
+	sol = -1 * coeff_array[0] / coeff_array[1]
+	print("The equation is linear. There in only one solution : x = -c/b")
+	print(f"x = {sol}")
+
+def	display_solutions_quadratic(coeff_array):
+	print("The discriminant Delta has the formula : Delta = b^2 - 4ac")
+	print("Delta can be either strictly positive, zero, or strictly negative, with the following consequences :")
+	print("Delta > 0 --> There are two distinct real solutions.")
+	print("Delta == 0 --> There is a singe real solution, also called a double root.")
+	print("Delta < 0 --> There are two distinct complex solutions.")
+	delta = calculate_delta(coeff_array)
+	print(f"Delta = {delta}")
+	if delta < 0:
+		display_complex_solutions(coeff_array, delta)
+	else:
+		display_real_solutions(coeff_array, delta)
+
+
+def	display_complex_solutions(coeff_array, delta):
+	# Solutions = (-b/2a) +- (i * |delta|^0.5 / 2a)
+	# x = real_part +- i * complex_part
+	print("The complex solutions have the formula : x = (-b/2a) ± (i * |delta|^0.5 / 2a)")
+	real_part = (-1 * coeff_array[1] / (2 * coeff_array[2]))
+	complex_part = ((abs(delta)) ** 0.5) / (2 * coeff_array[2])
+	sol_1 = floatToString(real_part) + " + " + floatToString(complex_part) + " i"
+	sol_2 = floatToString(real_part) + " - " + floatToString(complex_part) + " i"
+	print(f"x1 = {sol_1} | x2 = {sol_2}")
+
+def	display_real_solutions(coeff_array, delta):
 	# General case : solutions = (-b +- delta^0.5) / 2a
-
-	if coeff_array[2] == 0 and coeff_array[1] == 0: # There is no x in the reduced equation.
-		return None # Any number is a solution to the equation
-	elif coeff_array[2] == 0: # That is a linear equation. There is a single solution. x = -c/b
-		sol_1 = -1 * coeff_array[0] / coeff_array[1]
-		sol_2 = sol_1
-	elif delta >= 0:
-		sol_1 = (-1 * coeff_array[1] + delta ** 0.5) / (2 * coeff_array[2])
-		sol_2 = (-1 * coeff_array[1] - delta ** 0.5) / (2 * coeff_array[2])
+	print("The real solutions have the formula : x = (-b ± delta^0.5) / 2a")
+	
+	sol_1 = (-1 * coeff_array[1] + delta ** 0.5) / (2 * coeff_array[2])
+	sol_2 = (-1 * coeff_array[1] - delta ** 0.5) / (2 * coeff_array[2])
+	if delta == 0:
+		print("Delta is zero, both solutions are the same, and can be expressed with the formula x = -b/2a")
+		print(f"x = {sol_1}")
 	else:
-		# Delta is negative, that means the solutions are complex
-		# Solutions = (-b/2a) +- (i * |delta|^0.5 / 2a)
-		# We will return an array of string instead of float
-		sol_1 = (-1 * coeff_array[1] / (2 * coeff_array[2])) + (((abs(delta)) ** 0.5) / (2 * coeff_array[2]))
-		sol_2 = (-1 * coeff_array[1] / (2 * coeff_array[2])) - (((abs(delta)) ** 0.5) / (2 * coeff_array[2]))
-		return []
-		# Better to have a separate function for complex solutions. 
-	return [sol_1, sol_2]
+		print(f"x1 = {sol_1} | x2 = {sol_2}")
+
+
 
 def	calculate_delta(coeff_array):
 	# delta = b^2 - 4ac
@@ -69,6 +86,8 @@ def	calculate_delta(coeff_array):
 def	display_reduced_equation(reduced_coeff_array):
 	# Negative coefficient will be automatically displayed with the minus sign but not positive ones
 	# We add a plus sign before positive coefficient only if they are not at the beginning of the string
+	print("The reduced equation is the standard form 'ax^2 + bx + c = 0' with 3 coefficients (a, b, c).")
+	print(f"Here we have a = {reduced_coeff_array[2]} | b = {reduced_coeff_array[1]} | c = {reduced_coeff_array[0]}")
 	str_to_display = ""
 	str_to_display += "Reduced equation is : "
 	if reduced_coeff_array[2] != 0:
