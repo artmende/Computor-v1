@@ -22,9 +22,49 @@ def	main():
 	print(clean_input_array)
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
+	delta = calculate_delta(reduced_coeff_array)
+	solutions = calculate_solutions(reduced_coeff_array, delta)
+	if solutions == None:
+		print("Any number is a solution.")
+		return
+	elif reduced_coeff_array[2] == 0:
+		print("That is a linear equation. There is only one solution.")
+		print("x = ", solutions[0])
+	elif solutions[0] == solutions[1]:
+		print("For this equation, Delta is zero. We have a double root.")
+		print("x_1 = x_2 = ", solutions[0])
+	else:
+		print("Delta = ", delta)
+		print("x_1 = ", solutions[0])
+		print("x_2 = ", solutions[1])
 	# TO DO : Calculate Delta
 	# Depending of the value of Delta, solutions can be real or complex
 
+def	calculate_solutions(coeff_array, delta):
+	# General case : solutions = (-b +- delta^0.5) / 2a
+
+	if coeff_array[2] == 0 and coeff_array[1] == 0: # There is no x in the reduced equation.
+		return None # Any number is a solution to the equation
+	elif coeff_array[2] == 0: # That is a linear equation. There is a single solution. x = -c/b
+		sol_1 = -1 * coeff_array[0] / coeff_array[1]
+		sol_2 = sol_1
+	elif delta >= 0:
+		sol_1 = (-1 * coeff_array[1] + delta ** 0.5) / (2 * coeff_array[2])
+		sol_2 = (-1 * coeff_array[1] - delta ** 0.5) / (2 * coeff_array[2])
+	else:
+		# Delta is negative, that means the solutions are complex
+		# Solutions = (-b/2a) +- (i * |delta|^0.5 / 2a)
+		# We will return an array of string instead of float
+		sol_1 = (-1 * coeff_array[1] / (2 * coeff_array[2])) + (((abs(delta)) ** 0.5) / (2 * coeff_array[2]))
+		sol_2 = (-1 * coeff_array[1] / (2 * coeff_array[2])) - (((abs(delta)) ** 0.5) / (2 * coeff_array[2]))
+		return []
+		# Better to have a separate function for complex solutions. 
+	return [sol_1, sol_2]
+
+def	calculate_delta(coeff_array):
+	# delta = b^2 - 4ac
+	delta = coeff_array[1] * coeff_array[1] - (4 * coeff_array[2] * coeff_array[0])
+	return delta
 
 def	display_reduced_equation(reduced_coeff_array):
 	# Negative coefficient will be automatically displayed with the minus sign but not positive ones
