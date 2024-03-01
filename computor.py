@@ -23,16 +23,12 @@ def	main():
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
 
-	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 :# There is no x in the reduced equation.
+	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 : # There is no x in the reduced equation.
 		print("There is no x in the reduced equation. Any number is a solution.")
 	elif reduced_coeff_array[2] == 0:
 		display_solution_linear(reduced_coeff_array)
 	else:
 		display_solutions_quadratic(reduced_coeff_array)
-
-
-
-
 
 def	display_solution_linear(coeff_array):
 	# There is a single solution. x = -c/b
@@ -60,8 +56,8 @@ def	display_complex_solutions(coeff_array, delta):
 	print("The complex solutions have the formula : x = (-b/2a) ± (i * |delta|^0.5 / 2a)")
 	real_part = (-1 * coeff_array[1] / (2 * coeff_array[2]))
 	complex_part = ((abs(delta)) ** 0.5) / (2 * coeff_array[2])
-	sol_1 = floatToString(real_part) + " + " + floatToString(complex_part) + " i"
-	sol_2 = floatToString(real_part) + " - " + floatToString(complex_part) + " i"
+	sol_1 = float_to_string(real_part) + " + " + float_to_string(complex_part) + " i"
+	sol_2 = float_to_string(real_part) + " - " + float_to_string(complex_part) + " i"
 	print(f"x1 = {sol_1} | x2 = {sol_2}")
 
 def	display_real_solutions(coeff_array, delta):
@@ -91,17 +87,17 @@ def	display_reduced_equation(reduced_coeff_array):
 	str_to_display = ""
 	str_to_display += "Reduced equation is : "
 	if reduced_coeff_array[2] != 0:
-		str_to_display += floatToString(reduced_coeff_array[2])
+		str_to_display += float_to_string(reduced_coeff_array[2])
 		str_to_display += "x^2"
 	if reduced_coeff_array[1] != 0:
 		if reduced_coeff_array[1] > 0 and reduced_coeff_array[2] != 0:
 			str_to_display += "+"
-		str_to_display += floatToString(reduced_coeff_array[1])
+		str_to_display += float_to_string(reduced_coeff_array[1])
 		str_to_display += "x"
 	if reduced_coeff_array[0] != 0:
 		if reduced_coeff_array[0] > 0 and (reduced_coeff_array[2] != 0 or reduced_coeff_array[1] != 0):
 			str_to_display += "+"
-		str_to_display += floatToString(reduced_coeff_array[0])
+		str_to_display += float_to_string(reduced_coeff_array[0])
 	str_to_display += " = 0"
 	for x in range(2): # We add a space before and after plus and minus signs that are not at the beginning of the string (They can be maximum 2)
 		search_result = re.search("(?<=[^ ])[+-](?=[^ ])", str_to_display)
@@ -111,8 +107,10 @@ def	display_reduced_equation(reduced_coeff_array):
 	print(str_to_display)
 
 
-def	floatToString(inputValue):
-	return(str(inputValue))
+def	float_to_string(inputValue):
+	result = str(inputValue)
+	result = re.sub("\.0(?![0-9])", "", result) # getting rid of .0 when the there is no other digit after the 0
+	return result
 
 def	calculate_coefficients_of_reduced_equation(input_array):
 	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
@@ -124,9 +122,6 @@ def	calculate_coefficients_of_reduced_equation(input_array):
 	coeff_x_2_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^2)", input_array[1])))
 	reduced_coeff_array = [coeff_x_0_left_side - coeff_x_0_right_side, coeff_x_1_left_side - coeff_x_1_right_side, coeff_x_2_left_side - coeff_x_2_right_side]
 	return reduced_coeff_array
-
-
-
 
 def	args_check_and_treatment(argv):
 	# look for errors in equation, remove unneeded chars, normalize coefficients and exponents and split both side of the equal sign
@@ -140,15 +135,11 @@ def	args_check_and_treatment(argv):
 		exit()
 	#treated_equation = argv[1].replace(' ', '').replace('*', '').lower()
 	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
-
 	if check_for_common_errors(treated_equation) == False:
 		exit()
 	treated_equation = normalize_coeff_and_exponents(treated_equation)
-
 	treated_equation = treated_equation.split("=")
-
 	return treated_equation
-
 
 def	check_for_common_errors(equation_string):
 	result = True
@@ -168,25 +159,16 @@ def	check_for_common_errors(equation_string):
 		result = False
 	return result
 
-
-
 def	normalize_coeff_and_exponents(equation):
-	
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
-	
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
 
-	#print("Equation before normalization : ", result)
 	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	while (search_result != None):
 		result = re.sub("(?<!\^)[0-9](?![x.0-9])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or . or another number)
 		search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
-	#print("Equation after : ", result)
+
 	return result
-
-
-
-
 
 if __name__ == "__main__":
 	main()
