@@ -3,6 +3,8 @@
 # All regex formulas here were crafted with the help of https://regexr.com/.
 # Please visit the website for formulas explanation
 
+# https://wolfreealpha.gitlab.io to compare results quickly
+
 import sys
 import re
 
@@ -19,10 +21,8 @@ import re
 
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
-	print("")
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
-
 	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 : # There is no x in the reduced equation.
 		print("There is no x in the reduced equation. Any number is a solution.")
 	elif reduced_coeff_array[2] == 0:
@@ -34,21 +34,20 @@ def	display_solution_linear(coeff_array):
 	# There is a single solution. x = -c/b
 	sol = -1 * coeff_array[0] / coeff_array[1]
 	print("The equation is linear. There in only one solution : x = -c/b")
-	print(f"x = {sol}")
+	print(f"x = {float_to_string(sol)}")
 
 def	display_solutions_quadratic(coeff_array):
-	print("The discriminant Delta has the formula : Delta = b^2 - 4ac")
+	print("\nThe discriminant Delta has the formula : Delta = b^2 - 4ac")
 	print("Delta can be either strictly positive, zero, or strictly negative, with the following consequences :")
 	print("Delta > 0 --> There are two distinct real solutions.")
 	print("Delta == 0 --> There is a singe real solution, also called a double root.")
 	print("Delta < 0 --> There are two distinct complex solutions.")
 	delta = calculate_delta(coeff_array)
-	print(f"Delta = {delta}")
+	print(f"\nDelta = {float_to_string(delta)}")
 	if delta < 0:
 		display_complex_solutions(coeff_array, delta)
 	else:
 		display_real_solutions(coeff_array, delta)
-
 
 def	display_complex_solutions(coeff_array, delta):
 	# Solutions = (-b/2a) +- (i * |delta|^0.5 / 2a)
@@ -63,16 +62,13 @@ def	display_complex_solutions(coeff_array, delta):
 def	display_real_solutions(coeff_array, delta):
 	# General case : solutions = (-b +- delta^0.5) / 2a
 	print("The real solutions have the formula : x = (-b ± delta^0.5) / 2a")
-	
 	sol_1 = (-1 * coeff_array[1] + delta ** 0.5) / (2 * coeff_array[2])
 	sol_2 = (-1 * coeff_array[1] - delta ** 0.5) / (2 * coeff_array[2])
 	if delta == 0:
 		print("Delta is zero, both solutions are the same, and can be expressed with the formula x = -b/2a")
-		print(f"x = {sol_1}")
+		print(f"x = {float_to_string(sol_1)}")
 	else:
-		print(f"x1 = {sol_1} | x2 = {sol_2}")
-
-
+		print(f"x1 = {float_to_string(sol_1)} | x2 = {float_to_string(sol_2)}")
 
 def	calculate_delta(coeff_array):
 	# delta = b^2 - 4ac
@@ -82,10 +78,9 @@ def	calculate_delta(coeff_array):
 def	display_reduced_equation(reduced_coeff_array):
 	# Negative coefficient will be automatically displayed with the minus sign but not positive ones
 	# We add a plus sign before positive coefficient only if they are not at the beginning of the string
-	print("The reduced equation is the standard form 'ax^2 + bx + c = 0' with 3 coefficients (a, b, c).")
-	print(f"Here we have a = {reduced_coeff_array[2]} | b = {reduced_coeff_array[1]} | c = {reduced_coeff_array[0]}")
-	str_to_display = ""
-	str_to_display += "Reduced equation is : "
+	print("\nThe reduced equation is the standard form 'ax^2 + bx + c = 0' with 3 coefficients (a, b, c).")
+	print(f"Here we have a = {float_to_string(reduced_coeff_array[2])} | b = {float_to_string(reduced_coeff_array[1])} | c = {float_to_string(reduced_coeff_array[0])}")
+	str_to_display = "Reduced equation is : "
 	if reduced_coeff_array[2] != 0:
 		str_to_display += float_to_string(reduced_coeff_array[2])
 		str_to_display += "x^2"
@@ -104,12 +99,15 @@ def	display_reduced_equation(reduced_coeff_array):
 		if search_result != None:
 			str_to_display = re.sub("(?<=[^ ])[+-](?=[^ ])", " "  + search_result[0] + " ", str_to_display, count=1)
 	str_to_display = re.sub("\.0(?![0-9])", "", str_to_display) # getting rid of .0 when the coefficient is an integer
+	str_to_display = re.sub("(?<![0-9])1(?=x)", "", str_to_display) # getting rid of coefficient 1 for x and x^2 --> Find 1 that doesnt have another digit before it and that is followed by x, and delete it
 	print(str_to_display)
 
-
 def	float_to_string(inputValue):
-	result = str(inputValue)
+	result = round(inputValue, 5)
+	result = str(result)
 	result = re.sub("\.0(?![0-9])", "", result) # getting rid of .0 when the there is no other digit after the 0
+	if inputValue == 0:
+		result = result.replace("-", "") # avoiding -0
 	return result
 
 def	calculate_coefficients_of_reduced_equation(input_array):
@@ -162,12 +160,10 @@ def	check_for_common_errors(equation_string):
 def	normalize_coeff_and_exponents(equation):
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-
 	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	while (search_result != None):
 		result = re.sub("(?<!\^)[0-9](?![x.0-9])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or . or another number)
 		search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
-
 	return result
 
 if __name__ == "__main__":
