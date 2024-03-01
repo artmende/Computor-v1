@@ -46,7 +46,7 @@ def	display_solutions_quadratic(coeff_array):
 	print("\nThe discriminant Delta has the formula : Delta = b^2 - 4ac")
 	print("Delta can be either strictly positive, zero, or strictly negative, with the following consequences :")
 	print("Delta > 0 --> There are two distinct real solutions.")
-	print("Delta == 0 --> There is a singe real solution, also called a double root.")
+	print("Delta == 0 --> There is a single real solution, also called a double root.")
 	print("Delta < 0 --> There are two distinct complex solutions.")
 	delta = calculate_delta(coeff_array)
 	print(f"\nDelta = {float_to_string(delta)}")
