@@ -24,7 +24,11 @@ def	main():
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	display_reduced_equation(reduced_coeff_array)
 	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 : # There is no x in the reduced equation.
-		print("There is no x in the reduced equation. Any number is a solution.")
+		print("Equation of degree 0")
+		if reduced_coeff_array[0] == 0:
+			print("There is no x in the reduced equation. Any number is a solution.")
+		else:
+			print("The reduced equation is trivially false. There is no solution.")
 	elif reduced_coeff_array[2] == 0:
 		display_solution_linear(reduced_coeff_array)
 	else:
@@ -33,10 +37,12 @@ def	main():
 def	display_solution_linear(coeff_array):
 	# There is a single solution. x = -c/b
 	sol = -1 * coeff_array[0] / coeff_array[1]
+	print("Equation of degree 1")
 	print("The equation is linear. There in only one solution : x = -c/b")
 	print(f"x = {float_to_string(sol)}")
 
 def	display_solutions_quadratic(coeff_array):
+	print("Equation of degree 2")
 	print("\nThe discriminant Delta has the formula : Delta = b^2 - 4ac")
 	print("Delta can be either strictly positive, zero, or strictly negative, with the following consequences :")
 	print("Delta > 0 --> There are two distinct real solutions.")
@@ -89,7 +95,7 @@ def	display_reduced_equation(reduced_coeff_array):
 			str_to_display += "+"
 		str_to_display += float_to_string(reduced_coeff_array[1])
 		str_to_display += "x"
-	if reduced_coeff_array[0] != 0:
+	if reduced_coeff_array[0] != 0 or (reduced_coeff_array[1] == 0 and reduced_coeff_array[2] == 0):
 		if reduced_coeff_array[0] > 0 and (reduced_coeff_array[2] != 0 or reduced_coeff_array[1] != 0):
 			str_to_display += "+"
 		str_to_display += float_to_string(reduced_coeff_array[0])
