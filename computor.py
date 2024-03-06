@@ -165,7 +165,9 @@ def	check_for_common_errors(equation_string):
 		result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("Problem with equation : Each + or - need to be followed by a number.")
-		print(equation_string)
+		result = False
+	if re.search("(?<![0-9])\.", equation_string) != None or re.search("", equation_string) != None: # decimal dot that doesn't have numbers on both sides
+		print("Decimal numbers need to have numbers on both side of the decimal dot")
 		result = False
 	search_result = re.search("[^x+\-.^=0-9]", equation_string)
 	if search_result != None: #any other sign than {x+-.^=[0-9]}
