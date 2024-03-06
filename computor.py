@@ -152,10 +152,10 @@ def	check_for_common_errors(equation_string):
 	if re.search("[+\-.^][+\-.^]", equation_string) != None: # any 2 of those signs next to each other : [+-.^]
 		print("Problem with equation : 2 or more of those signs are next to each other : [+-.^]")
 		result = False
-	search_result = re.findall("(?<=\^)-?[0-9]+", equation_string) # get the exponent value
+	search_result = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
 	for i in range(len(search_result)):
-		if int(search_result[i]) > 2 or int(search_result[i]) < 0:
-			print("Exponents cannot be lower than 0 or higher than 2")
+		if search_result[i].count('.') != 0 or int(search_result[i]) > 2 or int(search_result[i]) < 0:
+			print("Exponents cannot be lower than 0 or higher than 2 and need to be integer. Only possible exponents are : 0 | 1 | 2")
 			result = False
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
 		print("Problem with equation : Each exponent sign --> ^ must be followed by one of those numbers [012]")
@@ -176,10 +176,10 @@ def	check_for_common_errors(equation_string):
 def	normalize_coeff_and_exponents(equation):
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-	search_result = re.search("(?<=\^)-?[0-9]+", result) # get the exponent value
+	search_result = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	while (search_result != None):
-		result = re.sub("(?<=\^)-?[0-9]+", "!" + str(int(search_result[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
-		search_result = re.search("(?<=\^)-?[0-9]+", result) # get the exponent value
+		result = re.sub("(?<=\^)-?[.0-9]+", "!" + str(int(search_result[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
+		search_result = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
 	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	while (search_result != None):
@@ -190,5 +190,3 @@ def	normalize_coeff_and_exponents(equation):
 
 if __name__ == "__main__":
 	main()
-
-
