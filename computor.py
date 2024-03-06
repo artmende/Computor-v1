@@ -14,11 +14,8 @@ import re
 # apply the math formula to get the discriminant, and to get the roots
 
 # Examples of equations
-# 8 * x^2 + 7 * x^1 - 9.4 * X = 8x + 2 - 7x^2 + 3.3*x^0
-# x + 7x^2 - 6 = 4 * x^0 + 8 * x^1 - 8.1 + 43*x^2
-
-# ./computor.py "0x^2 + 4^02 + 8x + 9x^1 = 0" --- bug with this one
-
+# 8 * x^2 + 7 * x^1 - 9.4 * X = 8x + 2 - 7x^2 + 3.3*x^0 ---> real roots
+# x + 7x^2 - 6 = 4 * x^0 + 8 * x^1 - 8.1 + 43*x^2 ---> complex roots
 
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
@@ -39,7 +36,7 @@ def	display_solution_linear(coeff_array):
 	# There is a single solution. x = -c/b
 	sol = -1 * coeff_array[0] / coeff_array[1]
 	print("Equation of degree 1")
-	print("The equation is linear. There in only one solution : x = -c/b")
+	print("The equation is linear. There is only one solution : x = -c/b")
 	print(f"x = {float_to_string(sol)}")
 
 def	display_solutions_quadratic(coeff_array):
@@ -148,19 +145,23 @@ def	args_check_and_treatment(argv):
 
 def	check_for_common_errors(equation_string):
 	result = True
+	split_result = equation_string.split("=")
+	if len(split_result[0]) == 0 or len(split_result[1]) == 0: # something like " = 4x" or "3x^2 + 7 = "
+		print("There must be something on both sides of the equal sign")
+		result = False
 	if re.search("[+\-.^][+\-.^]", equation_string) != None: # any 2 of those signs next to each other : [+-.^]
 		print("Problem with equation : 2 or more of those signs are next to each other : [+-.^]")
 		result = False
-	# instead, need to extract exponent value, and see if its outside of [0-2] range
 	search_result = re.findall("(?<=\^)-?[0-9]+", equation_string) # get the exponent value
 	for i in range(len(search_result)):
 		if int(search_result[i]) > 2 or int(search_result[i]) < 0:
 			print("Exponents cannot be lower than 0 or higher than 2")
 			result = False
-
-
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
 		print("Problem with equation : Each exponent sign --> ^ must be followed by one of those numbers [012]")
+		result = False
+	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
+		print("Problem with equation : Each exponent sign --> ^ must be preceded by x")
 		result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("Problem with equation : Each + or - need to be followed by a number.")
@@ -175,15 +176,19 @@ def	check_for_common_errors(equation_string):
 def	normalize_coeff_and_exponents(equation):
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
+	search_result = re.search("(?<=\^)-?[0-9]+", result) # get the exponent value
+	while (search_result != None):
+		result = re.sub("(?<=\^)-?[0-9]+", "!" + str(int(search_result[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
+		search_result = re.search("(?<=\^)-?[0-9]+", result) # get the exponent value
+	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
 	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	while (search_result != None):
 		result = re.sub("(?<!\^)[0-9](?![x.0-9])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or . or another number)
 		search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
+	#print(f"result is : {result}")
 	return result
-# need to treat exponents too ! 
-# replace exponents by their value 02 becomes 2
-
-
 
 if __name__ == "__main__":
 	main()
+
+
