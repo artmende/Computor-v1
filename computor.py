@@ -17,6 +17,12 @@ import re
 # 8 * x^2 + 7 * x^1 - 9.4 * X = 8x + 2 - 7x^2 + 3.3*x^0 ---> real roots
 # x + 7x^2 - 6 = 4 * x^0 + 8 * x^1 - 8.1 + 43*x^2 ---> complex roots
 
+#########################################
+# THINGS TO DO !
+# reimplement sqare root
+# Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
+
+
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
