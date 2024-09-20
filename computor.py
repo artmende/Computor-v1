@@ -20,6 +20,7 @@ import re
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
+	
 	display_reduced_equation(reduced_coeff_array)
 	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 : # There is no x in the reduced equation.
 		print("Equation of degree 0")
@@ -160,17 +161,19 @@ def	check_for_common_errors(equation_string):
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
 		print("Problem with equation : Each exponent sign --> ^ must be followed by one of those numbers [012]")
 		result = False
+
 	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
 		print("Problem with equation : Each exponent sign --> ^ must be preceded by x")
 		result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("Problem with equation : Each + or - need to be followed by a number or x")
 		result = False
+
 	if re.search("(?<![0-9])\.|\.(?![0-9])", equation_string) != None: # decimal dot that doesn't have numbers on both sides
 		print("Decimal numbers need to have numbers on both side of the decimal dot")
 		result = False
 	wrong_char_array = re.findall("[^x+\-.^=0-9]", equation_string)
-	if wrong_char_array != None: #any other sign than {x+-.^=[0-9]}
+	if len(wrong_char_array) > 0: #any other sign than {x+-.^=[0-9]}
 		for i in range(len(wrong_char_array)):
 			print("Problem with equation : Wrong character --> ", wrong_char_array[i])
 		result = False
@@ -179,16 +182,15 @@ def	check_for_common_errors(equation_string):
 def	normalize_coeff_and_exponents(equation):
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-	search_result = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
-	while (search_result != None):
-		result = re.sub("(?<=\^)-?[.0-9]+", "!" + str(int(search_result[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
-		search_result = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
+	exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
+	while (exponent != None):
+		result = re.sub("(?<=\^)-?[.0-9]+", "!" + str(int(exponent[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
+		exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
-	search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
-	while (search_result != None):
-		result = re.sub("(?<!\^)[0-9](?![x.0-9])", search_result[0] + "x^0", result, count=1) # Adding x^0 to numbers that are not an exponent, and that are not followed by x (or . or another number)
-		search_result = re.search("(?<!\^)[0-9](?![x.0-9])", result)
-	#print(f"result is : {result}")
+	lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result) # searching for a number that is not an exponent, and that is not followed by x (or . or another number)
+	while (lonely_coeff != None):
+		result = re.sub("(?<!\^)[0-9](?![x.0-9])", lonely_coeff[0] + "x^0", result, count=1) # Adding x^0 to those numbers
+		lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	return result
 
 if __name__ == "__main__":
