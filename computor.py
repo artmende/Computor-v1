@@ -152,9 +152,9 @@ def	check_for_common_errors(equation_string):
 	if re.search("[+\-.^][+\-.^]", equation_string) != None: # any 2 of those signs next to each other : [+-.^]
 		print("Problem with equation : 2 or more of those signs are next to each other : [+-.^]")
 		result = False
-	search_result = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
-	for i in range(len(search_result)):
-		if search_result[i].count('.') != 0 or int(search_result[i]) > 2 or int(search_result[i]) < 0:
+	exponents_array = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
+	for i in range(len(exponents_array)):
+		if exponents_array[i].count('.') != 0 or int(exponents_array[i]) > 2 or int(exponents_array[i]) < 0:
 			print("Exponents cannot be lower than 0 or higher than 2 and need to be integer. Only possible exponents are : 0 | 1 | 2")
 			result = False
 	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
@@ -164,14 +164,15 @@ def	check_for_common_errors(equation_string):
 		print("Problem with equation : Each exponent sign --> ^ must be preceded by x")
 		result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
-		print("Problem with equation : Each + or - need to be followed by a number.")
+		print("Problem with equation : Each + or - need to be followed by a number or x")
 		result = False
 	if re.search("(?<![0-9])\.|\.(?![0-9])", equation_string) != None: # decimal dot that doesn't have numbers on both sides
 		print("Decimal numbers need to have numbers on both side of the decimal dot")
 		result = False
-	search_result = re.search("[^x+\-.^=0-9]", equation_string)
-	if search_result != None: #any other sign than {x+-.^=[0-9]}
-		print("Problem with equation : Wrong character --> ", search_result[0])
+	wrong_char_array = re.findall("[^x+\-.^=0-9]", equation_string)
+	if wrong_char_array != None: #any other sign than {x+-.^=[0-9]}
+		for i in range(len(wrong_char_array)):
+			print("Problem with equation : Wrong character --> ", wrong_char_array[i])
 		result = False
 	return result
 
