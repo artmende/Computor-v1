@@ -19,7 +19,6 @@ import re
 
 #########################################
 # THINGS TO DO !
-# reimplement sqare root
 # Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
 
 
@@ -63,9 +62,10 @@ def	display_solutions_quadratic(coeff_array):
 def	display_complex_solutions(coeff_array, delta):
 	# Solutions = (-b/2a) +- (i * |delta|^0.5 / 2a)
 	# x = real_part +- i * complex_part
-	print("The complex solutions have the formula : x = (-b/2a) ± (i * |delta|^0.5 / 2a)")
+	print("\nThe complex solutions have the formula : x = (-b/2a) ± (i * |delta|^0.5 / 2a)")
 	real_part = (-1 * coeff_array[1] / (2 * coeff_array[2]))
-	complex_part = ((abs(delta)) ** 0.5) / (2 * coeff_array[2])
+	#complex_part = ((abs(delta)) ** 0.5) / (2 * coeff_array[2])
+	complex_part = my_square_root((my_abs(delta))) / (2 * my_abs(coeff_array[2]))
 	sol_1 = float_to_string(real_part) + " + " + float_to_string(complex_part) + " i"
 	sol_2 = float_to_string(real_part) + " - " + float_to_string(complex_part) + " i"
 	print(f"x1 = {sol_1} | x2 = {sol_2}")
@@ -73,8 +73,8 @@ def	display_complex_solutions(coeff_array, delta):
 def	display_real_solutions(coeff_array, delta):
 	# General case : solutions = (-b +- delta^0.5) / 2a
 	print("The real solutions have the formula : x = (-b ± delta^0.5) / 2a")
-	sol_1 = (-1 * coeff_array[1] + delta ** 0.5) / (2 * coeff_array[2])
-	sol_2 = (-1 * coeff_array[1] - delta ** 0.5) / (2 * coeff_array[2])
+	sol_1 = (-1 * coeff_array[1] + my_square_root(delta)) / (2 * coeff_array[2])
+	sol_2 = (-1 * coeff_array[1] - my_square_root(delta)) / (2 * coeff_array[2])
 	if delta == 0:
 		print("Delta is zero, both solutions are the same, and can be expressed with the formula x = -b/2a")
 		print(f"x = {float_to_string(sol_1)}")
@@ -114,7 +114,7 @@ def	display_reduced_equation(reduced_coeff_array):
 	print(str_to_display)
 
 def	float_to_string(inputValue):
-	result = round(inputValue, 5)
+	result = round(inputValue, 6)
 	result = str(result)
 	result = re.sub("\.0(?![0-9])", "", result) # getting rid of .0 when the there is no other digit after the 0
 	if inputValue == 0:
@@ -197,6 +197,23 @@ def	normalize_coeff_and_exponents(equation):
 		result = re.sub("(?<!\^)[0-9](?![x.0-9])", lonely_coeff[0] + "x^0", result, count=1) # Adding x^0 to those numbers
 		lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result)
 	return result
+
+def	my_abs(nbr):
+	if nbr > 0:
+		return nbr
+	else:
+		return -nbr
+
+def	my_square_root(nbr):
+	maximum_gap = 0.0000000000001
+	# as a first guess, I arbitraly divide the number by 8.
+	square_root = nbr / 8
+	i = 0
+	while (my_abs((square_root * square_root) - nbr) > maximum_gap):
+		square_root = 0.5 * (square_root + (nbr / square_root)) # Heron's method
+		print(f"loop number {i}")
+		i = i + 1
+	return square_root
 
 if __name__ == "__main__":
 	main()
