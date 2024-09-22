@@ -21,12 +21,17 @@ import re
 # THINGS TO DO !
 # Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
 
+def	main_2():
+	#print(str(int("-0.0")))
+	print(float_to_string(float("02.80")))
 
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
 	
 	display_reduced_equation(reduced_coeff_array)
+
+	##### HERE calculate and display at the same time
 	if reduced_coeff_array[2] == 0 and reduced_coeff_array[1] == 0 : # There is no x in the reduced equation.
 		print("Equation of degree 0")
 		if reduced_coeff_array[0] == 0:
@@ -122,6 +127,8 @@ def	float_to_string(inputValue):
 	return result
 
 def	calculate_coefficients_of_reduced_equation(input_array):
+	print("Input array left : ", input_array[0])
+	print("Input array right : ", input_array[1])
 	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
 	coeff_x_0_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[0])))
 	coeff_x_0_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[1])))
@@ -156,18 +163,18 @@ def	check_for_common_errors(equation_string):
 	if len(split_result[0]) == 0 or len(split_result[1]) == 0: # something like " = 4x" or "3x^2 + 7 = "
 		print("ERROR : There must be something on both sides of the equal sign")
 		result = False
-	if re.search("[+\-.^][+\-.^]", equation_string) != None: # any 2 of those signs next to each other : [+-.^]
-		print("ERROR : 2 or more of those signs are next to each other : [+-.^]")
+	if re.search("[+\-.][+\-.]", equation_string) != None: # any 2 of those signs next to each other : [+-.^] --> the - was removed to allow negative exponent at this point
+		print("ERROR : 2 or more of those signs are next to each other : [+-.]")
 		result = False
-	exponents_array = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
-	for i in range(len(exponents_array)):
-		if exponents_array[i].count('.') != 0 or int(exponents_array[i]) > 2 or int(exponents_array[i]) < 0:
-			print("ERROR : Exponents cannot be lower than 0 or higher than 2 and need to be integer. Only possible exponents are : 0 | 1 | 2")
-			result = False
-			break
-	if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
-		print("ERROR : Each exponent sign --> ^ must be followed by one of those numbers [012]")
-		result = False
+	#exponents_array = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
+	#for i in range(len(exponents_array)):
+	#	if exponents_array[i].count('.') != 0:# or int(exponents_array[i]) > 2 or int(exponents_array[i]) < 0:
+	#		#print("ERROR : Exponents cannot be lower than 0 or higher than 2 and need to be integer. Only possible exponents are : 0 | 1 | 2")
+	#		print(f"ERROR: Exponents \'{exponents_array[i]}\' is not an integer")
+	#		result = False
+	#if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
+	#	print("ERROR : Each exponent sign --> ^ must be followed by one of those numbers [012]")
+	#	result = False
 	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
 		print("ERROR : Each exponent sign --> ^ must be preceded by x")
 		result = False
@@ -189,9 +196,11 @@ def	normalize_coeff_and_exponents(equation):
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
 	exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	while (exponent != None):
-		result = re.sub("(?<=\^)-?[.0-9]+", "!" + str(int(exponent[0])), result, count=1) # converting exponents to int then back to str, to avoid -0 or 02 etc
+		result = re.sub("(?<=\^)-?[.0-9]+", "!" + float_to_string(float(exponent[0])), result, count=1) # converting exponents to float then back to str using the custom function, to avoid -0 or 02 or .0 etc
 		exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
+	print("Result : ", result)
+	###################### DOWN HERE NOT WORK FINE
 	lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result) # searching for a number that is not an exponent, and that is not followed by x (or . or another number)
 	while (lonely_coeff != None):
 		result = re.sub("(?<!\^)[0-9](?![x.0-9])", lonely_coeff[0] + "x^0", result, count=1) # Adding x^0 to those numbers
@@ -208,11 +217,8 @@ def	my_square_root(nbr):
 	maximum_gap = 0.0000000000001
 	# as a first guess, I arbitraly divide the number by 8.
 	square_root = nbr / 8
-	i = 0
 	while (my_abs((square_root * square_root) - nbr) > maximum_gap):
 		square_root = 0.5 * (square_root + (nbr / square_root)) # Heron's method
-		print(f"loop number {i}")
-		i = i + 1
 	return square_root
 
 if __name__ == "__main__":

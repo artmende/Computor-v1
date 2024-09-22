@@ -1,0 +1,13 @@
+exponents_array = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
+--> get an array with all the exponents
+--> remove all duplicate from that array
+--> use that array to do the reduced equation
+do the normalize_coeff_and_exponents before that !!
+
+
+
+in the ckeck for error, let all range of exponent pass
+
+Looking for lonely coeff
+i want to match a group of numbers, that can have 1 dot in it and that can start with -OR+. It CANNOT be preceded by ^
+that group of character CANNOT be followed by x
