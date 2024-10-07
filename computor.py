@@ -123,6 +123,12 @@ def	float_to_string(inputValue):
 	return result
 
 def	calculate_coefficients_of_reduced_equation(input_array):
+	# for every different exponent, sum all of their respective coefficient
+	# the highest exponent for which the final coefficient is not zero is the degree of the equation
+	# if there are non zero coefficient for any other exponent than 0 - 1 - 2 , the equation is not supported
+
+	# do a findall to select all exponents, and browse through the result, adding them one by one in a dictionary (creating new entry for new exponent, adding to the existing for repeated exponent)
+
 	print("Input array left : ", input_array[0])
 	print("Input array right : ", input_array[1])
 	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
