@@ -21,10 +21,6 @@ import re
 # THINGS TO DO !
 # Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
 
-def	main_2():
-	#print(str(int("-0.0")))
-	print(float_to_string(float("02.80")))
-
 def	main():
 	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
 	reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
@@ -199,21 +195,21 @@ def	normalize_coeff_and_exponents(equation):
 		result = re.sub("(?<=\^)-?[.0-9]+", "!" + float_to_string(float(exponent[0])), result, count=1) # converting exponents to float then back to str using the custom function, to avoid -0 or 02 or .0 etc
 		exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
 	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
-	print("Result : ", result)
-	###################### DOWN HERE NOT WORK FINE
-	lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result) # searching for a number that is not an exponent, and that is not followed by x (or . or another number)
+	# finding coefficients that don't have x, and adding x^0 (3x^2+2 will become 3x^2+2x^0)
+	lonely_coeff_regex = "((?<=([+=]))|(?<=^)|(?<=[0-9=]-)|(?<=^-))([0-9]+)\.?([0-9]+)?(?=([-+=])|$)"
+	lonely_coeff = re.search(lonely_coeff_regex, result)
 	while (lonely_coeff != None):
-		result = re.sub("(?<!\^)[0-9](?![x.0-9])", lonely_coeff[0] + "x^0", result, count=1) # Adding x^0 to those numbers
-		lonely_coeff = re.search("(?<!\^)[0-9](?![x.0-9])", result)
+		result = re.sub(lonely_coeff_regex, lonely_coeff[0] + "x^0", result, count=1) # Adding x^0 to those numbers
+		lonely_coeff = re.search(lonely_coeff_regex, result)
 	return result
 
-def	my_abs(nbr):
+def	my_abs(nbr): # the subject doesn't allow to use any math function other than addition, subraction, multiplication, division
 	if nbr > 0:
 		return nbr
 	else:
 		return -nbr
 
-def	my_square_root(nbr):
+def	my_square_root(nbr): # the subject doesn't allow to use any math function other than addition, subraction, multiplication, division
 	maximum_gap = 0.0000000000001
 	# as a first guess, I arbitraly divide the number by 8.
 	square_root = nbr / 8
