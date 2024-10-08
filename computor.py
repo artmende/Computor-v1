@@ -129,6 +129,10 @@ def	calculate_coefficients_of_reduced_equation(input_array):
 
 	# do a findall to select all exponents, and browse through the result, adding them one by one in a dictionary (creating new entry for new exponent, adding to the existing for repeated exponent)
 
+	exponent_dict = dict()
+
+	# exponent_list = findall(exp)
+	# for exp in exponent list --> check if that exp is present in dict. if no add it, if yes, update it. one time for each side
 	print("Input array left : ", input_array[0])
 	print("Input array right : ", input_array[1])
 	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
