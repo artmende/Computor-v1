@@ -190,6 +190,9 @@ def	check_for_common_errors(equation_string):
 	if re.search("(?<![0-9])\.|\.(?![0-9])", equation_string) != None: # decimal dot that doesn't have numbers on both sides
 		print("ERROR : Decimal numbers need to have numbers on both side of the decimal dot")
 		result = False
+	if re.search("[0-9]+\.[0-9]+\.[0-9]", equation_string) != None: # testing for things like 2.3.5
+		print("ERROR : A number cannot have more than one dot")
+		result = False
 	wrong_char_array = re.findall("[^x+\-.^=0-9]", equation_string)
 	if len(wrong_char_array) > 0: #any other sign than {x+-.^=[0-9]}
 		for i in range(len(wrong_char_array)):
