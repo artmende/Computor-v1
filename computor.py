@@ -129,9 +129,63 @@ def	calculate_coefficients_of_reduced_equation(input_array):
 
 	# do a findall to select all exponents, and browse through the result, adding them one by one in a dictionary (creating new entry for new exponent, adding to the existing for repeated exponent)
 
-	exponent_dict = dict()
+	coeff_dict = dict()
 
-	# exponent_list = findall(exp)
+# finding all exponents in both sides of the equation
+# using a set to avoid duplicates
+# summing all coefficient that correspond to that exponent
+	exponent_set_left = set(re.findall("(?<=\^)-?[.0-9]+", input_array[0]))
+	for exponent in exponent_set_left:
+		regex_coeff_this_exponent = "\+?-?[0-9.]+(?=x\^" + exponent + ")"
+		if exponent not in coeff_dict: # this is probably not needed for the left part
+			coeff_dict[exponent] = sum(map(float, re.findall(regex_coeff_this_exponent, input_array[0])))
+
+	exponent_set_right = set(re.findall("(?<=\^)-?[.0-9]+", input_array[1]))
+	for exponent in exponent_set_right:
+		regex_coeff_this_exponent = "\+?-?[0-9.]+(?=x\^" + exponent + ")"
+		if exponent in coeff_dict:
+			coeff_dict[exponent] -= sum(map(float, re.findall(regex_coeff_this_exponent, input_array[1])))
+		else:
+			coeff_dict[exponent] = 0 - sum(map(float, re.findall(regex_coeff_this_exponent, input_array[1])))
+
+	# deleting all exponents that have a coefficient equal to zero
+	for exponent, coeff in coeff_dict.items():
+		if coeff == 0:
+			del coeff_dict[exponent] # maybe no need for that, can just used the ordered list and check for value each time
+
+	# making an ordered list of all exponents in the equation
+	exponent_list = []
+	for exponent in coeff_dict:
+		exponent_list.append(exponent)
+	exponent_list.sort(reverse=True) # highest exponent at the beginning
+
+	print("Reduced equation is : ", end="")
+	for exponent in exponent_list:
+		# printing the + or - that precedes the coefficient
+		if coeff_dict[exponent] > 0 and exponent != exponent_list[0]:
+			print(" + ", end="")
+		if coeff_dict[exponent] < 0 and exponent != exponent_list[0]:
+			print(" - ", end="")
+		if coeff_dict[exponent] < 0 and exponent == exponent_list[0]:
+			print("-", end="")
+		# printing the coefficient
+		print(f"{float_to_string(my_abs(coeff_dict[exponent]))}", end="")
+		# printing the x with its exponent
+		if exponent == "1":
+			print("x", end="")
+		if exponent != "0" and exponent != "1":
+			print(f"x^{exponent}", end="")
+	print(" = 0")
+
+	print(f"That's an equation of degree {exponent_list[0]}")
+
+	# This program only solves equation of degree up to 2 with exponents that are positive integers. Only possible exponents are : 0 | 1 | 2
+	# Why not try this equation instead : 
+
+	# removing item in dict where value is 0
+	# if max key is more than 2 or min key is less than 0, we cannot solve
+
+
 	# for exp in exponent list --> check if that exp is present in dict. if no add it, if yes, update it. one time for each side
 	print("Input array left : ", input_array[0])
 	print("Input array right : ", input_array[1])
