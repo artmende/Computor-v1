@@ -199,6 +199,15 @@ def	check_for_common_errors(equation_string):
 	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
 		print("ERROR : Each exponent sign --> ^ must be preceded by x")
 		result = False
+	if re.search("\^(?![0-9-+])", equation_string) != None: # exponent sign that is followed by something else than a minus sign, a plus sign or a number
+		print("ERROR : Each exponent sign --> ^ must be followed by a number")
+		result = False
+	exponent_regex = "(?<=\^)-?\+?[.0-9]+x?" # Used to detect an empty exponent. Something like "8x^ + 9x = 0"
+	exponent_list = re.findall(exponent_regex, equation_string)
+	for exponent in exponent_list:
+		if exponent.count('x') != 0: # an empty exponent will take the next term of the equation as the exponent, that will include an x
+			print("ERROR : Issue with exponent")
+			result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("ERROR : Each + or - need to be followed by a number or x")
 		result = False
@@ -216,12 +225,14 @@ def	check_for_common_errors(equation_string):
 	return result
 
 def	normalize_coeff_and_exponents(equation):
+	print(equation)
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
-	exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
+	exponent_regex = "(?<=\^)-?\+?[.0-9]+"
+	exponent = re.search(exponent_regex, result) # get the exponent value
 	while (exponent != None):
-		result = re.sub("(?<=\^)-?[.0-9]+", "!" + float_to_string(float(exponent[0])), result, count=1) # converting exponents to float then back to str using the custom function, to avoid -0 or 02 or .0 etc
-		exponent = re.search("(?<=\^)-?[.0-9]+", result) # get the exponent value
+		result = re.sub(exponent_regex, "!" + float_to_string(float(exponent[0])), result, count=1) # converting exponents to float then back to str using the custom function, to avoid -0 or 02 or .0 etc
+		exponent = re.search(exponent_regex, result) # get the exponent value
 	result = re.sub("!", "", result) # We added a ! to prevent infinite loop, now we remove it
 	# finding coefficients that don't have x, and adding x^0 (3x^2+2 will become 3x^2+2x^0)
 	lonely_coeff_regex = "((?<=([+=]))|(?<=^)|(?<=[0-9=]-)|(?<=^-))([0-9]+)\.?([0-9]+)?(?=([-+=])|$)"
@@ -238,7 +249,9 @@ def	my_abs(nbr): # the subject doesn't allow to use any math function other than
 		return -nbr
 
 def	my_square_root(nbr): # the subject doesn't allow to use any math function other than addition, subraction, multiplication, division
+	# return (nbr ** 0.5)
 	maximum_gap = 0.0000000000001
+	maximum_gap = 0.00000001
 	# as a first guess, I arbitraly divide the number by 8.
 	square_root = nbr / 8
 	while (my_abs((square_root * square_root) - nbr) > maximum_gap):
