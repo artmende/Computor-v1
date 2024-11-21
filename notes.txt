@@ -20,3 +20,5 @@ Error cases :
 ./computor.py "8x^ + 9x - 7 = 74x^2 - 87"
 ./computor.py "8x^+2 + 9x - 7 = 74x^2 - 87"
 
+./computor.py "x^2 + 4x + 6 = 2*x * + 8 - 3x^2" 
+./computor.py "x^2 + 4x + 6 = 2xx + 8 - 3x^2" 

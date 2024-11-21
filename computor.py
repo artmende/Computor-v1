@@ -181,7 +181,9 @@ def	args_check_and_treatment(argv):
 		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
 		exit()
 	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
-	if check_for_common_errors(treated_equation) == False:
+	# if check_for_common_errors(treated_equation) == False:
+	# 	exit()
+	if check_for_common_errors(argv[1]) == False:
 		exit()
 	treated_equation = normalize_coeff_and_exponents(treated_equation)
 	treated_equation = treated_equation.split("=")
@@ -189,12 +191,20 @@ def	args_check_and_treatment(argv):
 
 def	check_for_common_errors(equation_string):
 	result = True
+	equation_string = re.sub("[\s]+", "", equation_string).lower() # Removing whitespaces and making all X lower case
+	if re.search("(?<![0-9])\*|\*(?!x)", equation_string) != None: # a * that is at the wrong place. Something like "3x * = 6"
+		print("ERROR : * is at the wrong place")
+		result = False
+	equation_string = equation_string.replace("*", "") # Removing all stars
 	split_result = equation_string.split("=")
 	if len(split_result[0]) == 0 or len(split_result[1]) == 0: # something like " = 4x" or "3x^2 + 7 = "
 		print("ERROR : There must be something on both sides of the equal sign")
 		result = False
 	if re.search("[+\-.][+\-.]", equation_string) != None: # any 2 of those signs next to each other : [+-.^] --> the ^ was removed to allow negative exponent at this point
 		print("ERROR : 2 or more of those signs are next to each other : [+-.]")
+		result = False
+	if re.search("xx", equation_string) != None:
+		print("ERROR : Two x cannot be next to each other")
 		result = False
 	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
 		print("ERROR : Each exponent sign --> ^ must be preceded by x")
@@ -225,7 +235,6 @@ def	check_for_common_errors(equation_string):
 	return result
 
 def	normalize_coeff_and_exponents(equation):
-	print(equation)
 	result = re.sub("(?<![0-9])x", "1x", equation) # Adding coefficient 1 when x doesn't have a coefficient
 	result = re.sub("x(?!\^)", "x^1", result) # Adding power of 1, where there is no exponent
 	exponent_regex = "(?<=\^)-?\+?[.0-9]+"
@@ -249,8 +258,6 @@ def	my_abs(nbr): # the subject doesn't allow to use any math function other than
 		return -nbr
 
 def	my_square_root(nbr): # the subject doesn't allow to use any math function other than addition, subraction, multiplication, division
-	# return (nbr ** 0.5)
-	maximum_gap = 0.0000000000001
 	maximum_gap = 0.00000001
 	# as a first guess, I arbitraly divide the number by 8.
 	square_root = nbr / 8
