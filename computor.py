@@ -22,9 +22,8 @@ import re
 # Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
 
 def	main():
-	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad
-	#reduced_coeff_array = calculate_coefficients_of_reduced_equation(clean_input_array)
-	coeff_dict = calculate_coefficients_of_reduced_equation(clean_input_array)
+	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad. clean_input_array is an array of two strings. They are both sides of the equation, separated by the =
+	coeff_dict = calculate_coefficients_of_reduced_equation(clean_input_array) # coeff_dict is a dictionary : exponents (string) --> coefficients (float)
 	display_reduced_equation(coeff_dict)
 	verify_that_the_reduced_equation_is_solvable(coeff_dict) # will exit the program if cannot solve
 	calculate_solutions(coeff_dict)
@@ -50,12 +49,10 @@ def calculate_solutions(coeff_dict):
 def	display_solution_linear(coeff_dict):
 	# There is a single solution. x = -c/b
 	sol = -1 * coeff_dict["0"] / coeff_dict["1"]
-	#print("Equation of degree 1")
 	print("The equation is linear. There is only one solution : x = -c/b")
 	print(f"x = {float_to_string(sol)}")
 
 def	display_solutions_quadratic(coeff_dict):
-	#print("Equation of degree 2")
 	print("\nThe discriminant Delta has the formula : Delta = b^2 - 4ac")
 	print("Delta can be either strictly positive, zero, or strictly negative, with the following consequences :")
 	print("Delta > 0 --> There are two distinct real solutions.")
@@ -73,7 +70,6 @@ def	display_complex_solutions(coeff_dict, delta):
 	# x = real_part +- i * complex_part
 	print("\nThe complex solutions have the formula : x = (-b/2a) ± (i * |delta|^0.5 / 2a)")
 	real_part = (-1 * coeff_dict["1"] / (2 * coeff_dict["2"]))
-	#complex_part = ((abs(delta)) ** 0.5) / (2 * coeff_array[2])
 	complex_part = my_square_root((my_abs(delta))) / (2 * my_abs(coeff_dict["2"]))
 	sol_1 = float_to_string(real_part) + " + " + float_to_string(complex_part) + " i"
 	sol_2 = float_to_string(real_part) + " - " + float_to_string(complex_part) + " i"
@@ -96,10 +92,11 @@ def	calculate_delta(coeff_dict):
 	return delta
 
 def	display_reduced_equation(coeff_dict):
-	# making an ordered list of all exponents in the equation
+	# making an ordered list of all exponents that have a non zero coefficient in the equation
 	exponent_list = []
 	for exponent in coeff_dict:
-		exponent_list.append(exponent)
+		if coeff_dict[exponent] != 0:
+			exponent_list.append(exponent)
 	exponent_list.sort(reverse=True) # highest exponent at the beginning
 	print("Reduced equation is : ", end="")
 	if len(exponent_list) == 0:
@@ -126,37 +123,9 @@ def	display_reduced_equation(coeff_dict):
 	print(" = 0")
 	print(f"That's an equation of degree {exponent_list[0]}")
 
-
-
-	## Negative coefficient will be automatically displayed with the minus sign but not positive ones
-	## We add a plus sign before positive coefficient only if they are not at the beginning of the string
-	#print("\nThe reduced equation is the standard form 'ax^2 + bx + c = 0' with 3 coefficients (a, b, c).")
-	#print(f"Here we have a = {float_to_string(reduced_coeff_array[2])} | b = {float_to_string(reduced_coeff_array[1])} | c = {float_to_string(reduced_coeff_array[0])}")
-	#str_to_display = "Reduced equation is : "
-	#if reduced_coeff_array[2] != 0:
-	#	str_to_display += float_to_string(reduced_coeff_array[2])
-	#	str_to_display += "x^2"
-	#if reduced_coeff_array[1] != 0:
-	#	if reduced_coeff_array[1] > 0 and reduced_coeff_array[2] != 0:
-	#		str_to_display += "+"
-	#	str_to_display += float_to_string(reduced_coeff_array[1])
-	#	str_to_display += "x"
-	#if reduced_coeff_array[0] != 0 or (reduced_coeff_array[1] == 0 and reduced_coeff_array[2] == 0):
-	#	if reduced_coeff_array[0] > 0 and (reduced_coeff_array[2] != 0 or reduced_coeff_array[1] != 0):
-	#		str_to_display += "+"
-	#	str_to_display += float_to_string(reduced_coeff_array[0])
-	#str_to_display += " = 0"
-	#for x in range(2): # We add a space before and after plus and minus signs that are not at the beginning of the string (They can be maximum 2)
-	#	search_result = re.search("(?<=[^ ])[+-](?=[^ ])", str_to_display)
-	#	if search_result != None:
-	#		str_to_display = re.sub("(?<=[^ ])[+-](?=[^ ])", " "  + search_result[0] + " ", str_to_display, count=1)
-	#str_to_display = re.sub("\.0(?![0-9])", "", str_to_display) # getting rid of .0 when the coefficient is an integer
-	#str_to_display = re.sub("(?<![0-9])1(?=x)", "", str_to_display) # getting rid of coefficient 1 for x and x^2 --> Find 1 that doesnt have another digit before it and that is followed by x, and delete it
-	#print(str_to_display)
-
 def	verify_that_the_reduced_equation_is_solvable(coeff_dict):
 	for exponent in coeff_dict:
-		if (exponent != "0" and exponent != "1" and exponent != "2"):
+		if (exponent != "0" and exponent != "1" and exponent != "2" and coeff_dict[exponent] != 0):
 			print("This program only solves equation of degree up to 2 with exponents that are positive integers. Only possible exponents are : 0 | 1 | 2")
 			print("Why not try this equation instead : x^2 + 11x = -24")
 			exit()
@@ -173,8 +142,6 @@ def	calculate_coefficients_of_reduced_equation(input_array):
 	# for every different exponent, sum all of their respective coefficient
 	# the highest exponent for which the final coefficient is not zero is the degree of the equation
 	# if there are non zero coefficient for any other exponent than 0 - 1 - 2 , the equation is not supported
-
-	# do a findall to select all exponents, and browse through the result, adding them one by one in a dictionary (creating new entry for new exponent, adding to the existing for repeated exponent)
 
 	coeff_dict = dict()
 
@@ -195,59 +162,13 @@ def	calculate_coefficients_of_reduced_equation(input_array):
 		else:
 			coeff_dict[exponent] = 0 - sum(map(float, re.findall(regex_coeff_this_exponent, input_array[1])))
 
-	# deleting all exponents that have a coefficient equal to zero
-	key_list = list(coeff_dict.keys()) # iterating over a copy of the keys to not invalidate iterators when deleting
-	for exponent in key_list:
-		if coeff_dict[exponent] == 0:
-			del coeff_dict[exponent] # maybe no need for that, can just used the ordered list and check for value each time
+	# # deleting all exponents that have a coefficient equal to zero
+	# key_list = list(coeff_dict.keys()) # iterating over a copy of the keys to not invalidate iterators when deleting
+	# for exponent in key_list:
+	# 	if coeff_dict[exponent] == 0:
+	# 		del coeff_dict[exponent] # maybe no need for that, can just used the ordered list and check for value each time
 
 	return coeff_dict
-
-	# making an ordered list of all exponents in the equation
-	exponent_list = []
-	for exponent in coeff_dict:
-		exponent_list.append(exponent)
-	exponent_list.sort(reverse=True) # highest exponent at the beginning
-
-	print("Reduced equation is : ", end="")
-	for exponent in exponent_list:
-		# printing the + or - that precedes the coefficient
-		if coeff_dict[exponent] > 0 and exponent != exponent_list[0]:
-			print(" + ", end="")
-		if coeff_dict[exponent] < 0 and exponent != exponent_list[0]:
-			print(" - ", end="")
-		if coeff_dict[exponent] < 0 and exponent == exponent_list[0]:
-			print("-", end="")
-		# printing the coefficient
-		print(f"{float_to_string(my_abs(coeff_dict[exponent]))}", end="")
-		# printing the x with its exponent
-		if exponent == "1":
-			print("x", end="")
-		if exponent != "0" and exponent != "1":
-			print(f"x^{exponent}", end="")
-	print(" = 0")
-
-	print(f"That's an equation of degree {exponent_list[0]}")
-
-	# This program only solves equation of degree up to 2 with exponents that are positive integers. Only possible exponents are : 0 | 1 | 2
-	# Why not try this equation instead : 
-
-	# removing item in dict where value is 0
-	# if max key is more than 2 or min key is less than 0, we cannot solve
-
-
-	# for exp in exponent list --> check if that exp is present in dict. if no add it, if yes, update it. one time for each side
-	print("Input array left : ", input_array[0])
-	print("Input array right : ", input_array[1])
-	# Finding numbers with 1 or more digit, with or without dot, with or without a plus or minus sign before it, and followed by x^0, x^1 or x^2, converting them to a float, then summing them
-	coeff_x_0_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[0])))
-	coeff_x_0_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^0)", input_array[1])))
-	coeff_x_1_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^1)", input_array[0])))
-	coeff_x_1_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^1)", input_array[1])))
-	coeff_x_2_left_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^2)", input_array[0])))
-	coeff_x_2_right_side = sum(map(float, re.findall("\+?-?[0-9.]+(?=x\^2)", input_array[1])))
-	reduced_coeff_array = [coeff_x_0_left_side - coeff_x_0_right_side, coeff_x_1_left_side - coeff_x_1_right_side, coeff_x_2_left_side - coeff_x_2_right_side]
-	return reduced_coeff_array
 
 def	args_check_and_treatment(argv):
 	# look for errors in equation, remove unneeded chars, normalize coefficients and exponents and split both side of the equal sign
@@ -259,7 +180,6 @@ def	args_check_and_treatment(argv):
 		print("Your equation must have one and only one equal sign --> =")
 		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
 		exit()
-	#treated_equation = argv[1].replace(' ', '').replace('*', '').lower()
 	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
 	if check_for_common_errors(treated_equation) == False:
 		exit()
@@ -273,18 +193,9 @@ def	check_for_common_errors(equation_string):
 	if len(split_result[0]) == 0 or len(split_result[1]) == 0: # something like " = 4x" or "3x^2 + 7 = "
 		print("ERROR : There must be something on both sides of the equal sign")
 		result = False
-	if re.search("[+\-.][+\-.]", equation_string) != None: # any 2 of those signs next to each other : [+-.^] --> the - was removed to allow negative exponent at this point
+	if re.search("[+\-.][+\-.]", equation_string) != None: # any 2 of those signs next to each other : [+-.^] --> the ^ was removed to allow negative exponent at this point
 		print("ERROR : 2 or more of those signs are next to each other : [+-.]")
 		result = False
-	#exponents_array = re.findall("(?<=\^)-?[.0-9]+", equation_string) # get the exponent value
-	#for i in range(len(exponents_array)):
-	#	if exponents_array[i].count('.') != 0:# or int(exponents_array[i]) > 2 or int(exponents_array[i]) < 0:
-	#		#print("ERROR : Exponents cannot be lower than 0 or higher than 2 and need to be integer. Only possible exponents are : 0 | 1 | 2")
-	#		print(f"ERROR: Exponents \'{exponents_array[i]}\' is not an integer")
-	#		result = False
-	#if re.search("\^(?![0-2])", equation_string) != None: # exponent sign that is not followed by 0 - 1 - 2
-	#	print("ERROR : Each exponent sign --> ^ must be followed by one of those numbers [012]")
-	#	result = False
 	if re.search("(?<!x)\^", equation_string) != None: # exponent sign that is not preceded by x
 		print("ERROR : Each exponent sign --> ^ must be preceded by x")
 		result = False
