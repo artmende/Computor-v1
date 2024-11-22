@@ -3,7 +3,7 @@
 # All regex formulas here were crafted with the help of https://regexr.com/.
 # Please visit the website for formulas explanation
 
-# https://wolfreealpha.gitlab.io to compare results quickly
+# https://www.wolframalpha.com/ to compare results quickly
 
 import sys
 import re
@@ -17,12 +17,9 @@ import re
 # 8 * x^2 + 7 * x^1 - 9.4 * X = 8x + 2 - 7x^2 + 3.3*x^0 ---> real roots
 # x + 7x^2 - 6 = 4 * x^0 + 8 * x^1 - 8.1 + 43*x^2 ---> complex roots
 
-#########################################
-# THINGS TO DO !
-# Calculate reduced form of equation before looking at exponent. So we can get the degree anyway, and some higher degree might simplify themselves
 
 def	main():
-	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad. clean_input_array is an array of two strings. They are both sides of the equation, separated by the =
+	clean_input_array = args_check_and_treatment(sys.argv) # will exit the program if input is bad. clean_input_array is an array of two strings. They are both sides of the equation in a standard form, separated by the =
 	coeff_dict = calculate_coefficients_of_reduced_equation(clean_input_array) # coeff_dict is a dictionary : exponents (string) --> coefficients (float)
 	display_reduced_equation(coeff_dict)
 	verify_that_the_reduced_equation_is_solvable(coeff_dict) # will exit the program if cannot solve
@@ -35,6 +32,8 @@ def calculate_solutions(coeff_dict):
 		coeff_dict["1"] = 0
 	if "2" not in coeff_dict:
 		coeff_dict["2"] = 0
+	print("\nThe reduced equation is the standard form 'ax^2 + bx + c = 0' with 3 coefficients (a, b, c).")
+	print(f"Here we have a = {float_to_string(coeff_dict['2'])} | b = {float_to_string(coeff_dict['1'])} | c = {float_to_string(coeff_dict['0'])}")
 	if coeff_dict["2"] == 0 and coeff_dict["1"] == 0: # There is no x in the reduced equation.
 		if coeff_dict["0"] == 0:
 			print("There is no x in the reduced equation. Any number is a solution.")
@@ -44,7 +43,6 @@ def calculate_solutions(coeff_dict):
 		display_solution_linear(coeff_dict)
 	else:
 		display_solutions_quadratic(coeff_dict)
-
 
 def	display_solution_linear(coeff_dict):
 	# There is a single solution. x = -c/b
@@ -139,35 +137,20 @@ def	float_to_string(inputValue):
 	return result
 
 def	calculate_coefficients_of_reduced_equation(input_array):
-	# for every different exponent, sum all of their respective coefficient
-	# the highest exponent for which the final coefficient is not zero is the degree of the equation
-	# if there are non zero coefficient for any other exponent than 0 - 1 - 2 , the equation is not supported
-
 	coeff_dict = dict()
-
-# finding all exponents in both sides of the equation
-# using a set to avoid duplicates
-# summing all coefficient that correspond to that exponent
-	exponent_set_left = set(re.findall("(?<=\^)-?[.0-9]+", input_array[0]))
+# finding all exponents in both sides of the equation and summing all coefficient that correspond to that exponent
+	exponent_set_left = set(re.findall("(?<=\^)-?[.0-9]+", input_array[0])) # using a set to avoid duplicates
 	for exponent in exponent_set_left:
 		regex_coeff_this_exponent = "\+?-?[0-9.]+(?=x\^" + exponent + ")"
 		if exponent not in coeff_dict: # this is probably not needed for the left part
 			coeff_dict[exponent] = sum(map(float, re.findall(regex_coeff_this_exponent, input_array[0])))
-
-	exponent_set_right = set(re.findall("(?<=\^)-?[.0-9]+", input_array[1]))
+	exponent_set_right = set(re.findall("(?<=\^)-?[.0-9]+", input_array[1])) # using a set to avoid duplicates
 	for exponent in exponent_set_right:
 		regex_coeff_this_exponent = "\+?-?[0-9.]+(?=x\^" + exponent + ")"
 		if exponent in coeff_dict:
 			coeff_dict[exponent] -= sum(map(float, re.findall(regex_coeff_this_exponent, input_array[1])))
 		else:
 			coeff_dict[exponent] = 0 - sum(map(float, re.findall(regex_coeff_this_exponent, input_array[1])))
-
-	# # deleting all exponents that have a coefficient equal to zero
-	# key_list = list(coeff_dict.keys()) # iterating over a copy of the keys to not invalidate iterators when deleting
-	# for exponent in key_list:
-	# 	if coeff_dict[exponent] == 0:
-	# 		del coeff_dict[exponent] # maybe no need for that, can just used the ordered list and check for value each time
-
 	return coeff_dict
 
 def	args_check_and_treatment(argv):
@@ -180,11 +163,9 @@ def	args_check_and_treatment(argv):
 		print("Your equation must have one and only one equal sign --> =")
 		print('An example of a valid equation is : "x^2 + 4x + 6 = 2x + 8 - 3x^2"')
 		exit()
-	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
-	# if check_for_common_errors(treated_equation) == False:
-	# 	exit()
 	if check_for_common_errors(argv[1]) == False:
 		exit()
+	treated_equation = re.sub("[*\s]+", "", argv[1]).lower() # Removing stars, whitespaces, and making all X lower case
 	treated_equation = normalize_coeff_and_exponents(treated_equation)
 	treated_equation = treated_equation.split("=")
 	return treated_equation
@@ -216,7 +197,7 @@ def	check_for_common_errors(equation_string):
 	exponent_list = re.findall(exponent_regex, equation_string)
 	for exponent in exponent_list:
 		if exponent.count('x') != 0: # an empty exponent will take the next term of the equation as the exponent, that will include an x
-			print("ERROR : Issue with exponent")
+			print("ERROR : Issue with exponent or issue with multiplication. Note that this program only supports multiplication between a coefficient and a power of x. Don't input a multiplication of two x.")
 			result = False
 	if re.search("[+-](?![0-9x])", equation_string) != None: # + - with no digit after it
 		print("ERROR : Each + or - need to be followed by a number or x")
